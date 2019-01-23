@@ -3,10 +3,11 @@
 
 #include <cstdlib>
 #include <stdio.h>
+#include <GLFW/glfw3.h>
 
 #define ASSERT_VK(result) \
     if(result != VK_SUCCESS){ \
-        printf("VK ERROR %d",result); \
+        printf("\t -- VK %d",result); \
         exit(-1); \
     }
 

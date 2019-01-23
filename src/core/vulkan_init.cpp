@@ -1,4 +1,4 @@
-#include "vulkan_core.h"
+#include "vulkan_init.h"
 #include "macro.h"
 
 const int maxGPUProcessors = 16;
@@ -46,4 +46,30 @@ VkPhysicalDevice pickPhysicalDevice(VkPhysicalDevice *physicalDevices) {
 
     vkPhysicalDevice = physicalDevices[0];
     return vkPhysicalDevice;
+}
+
+VkDevice createVkDevice(VkPhysicalDevice vkPhysicalDevice) {
+    const std::vector<const char *> deviceExtenstions = {
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+            VK_KHR_SURFACE_EXTENSION_NAME
+    };
+
+
+    VkDevice vkDevice = nullptr;
+
+    VkDeviceCreateInfo vkDeviceCreateInfo = {VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO};
+    vkDeviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtenstions.size());
+    vkDeviceCreateInfo.ppEnabledExtensionNames = deviceExtenstions.data();
+
+    ASSERT_VK(vkCreateDevice(vkPhysicalDevice, &vkDeviceCreateInfo, nullptr, &vkDevice));
+    return vkDevice;
+}
+
+VkSurfaceKHR createVkSurface(VkInstance instance) {
+    VkSurfaceKHR vkSurfaceKHR = nullptr;
+    VkDisplaySurfaceCreateInfoKHR vkDisplaySurfaceCreateInfoKHR = {VK_STRUCTURE_TYPE_DISPLAY_SURFACE_CREATE_INFO_KHR};
+
+
+    ASSERT_VK(vkCreateDisplayPlaneSurfaceKHR(instance, &vkDisplaySurfaceCreateInfoKHR, nullptr, &vkSurfaceKHR));
+    return vkSurfaceKHR;
 }
