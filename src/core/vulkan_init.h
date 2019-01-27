@@ -5,9 +5,6 @@
 #include <stdexcept>
 #include "macro.h"
 #include <vector>
-#include <GLFW/glfw3native.h>
-#include <vulkan/vulkan_win32.h>
-#include <libloaderapi.h>
 
 VkInstance createVkInstance();
 
@@ -21,6 +18,6 @@ VkQueue getGraphicsQueue(VkDevice vkDevice, uint32_t familyIndex);
 
 uint32_t getGraphicsBitQueueFamily(VkPhysicalDevice vkPhysicalDevice);
 
-VkSurfaceKHR createVkSurface(VkInstance instance);
+VkSurfaceKHR createVkSurface(VkInstance instance, GLFWwindow *window);
 
 #endif //VULKAN_1_VULKAN_CORE_H

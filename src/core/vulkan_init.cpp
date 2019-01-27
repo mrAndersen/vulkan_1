@@ -1,5 +1,11 @@
-
 #include "vulkan_init.h"
+
+#ifdef WIN32
+
+//#include <vulkan/vulkan_win32.h>
+//#include <windef.h>
+
+#endif
 
 
 const int maxGPUProcessors = 16;
@@ -7,13 +13,18 @@ const int maxGPUProcessors = 16;
 VkInstance createVkInstance() {
     VkInstance vkInstance = nullptr;
 
-    uint32_t count = 10;
-    auto extensionNames = glfwGetRequiredInstanceExtensions(&count);
+    const char *extensions[] = {
+            VK_KHR_SURFACE_EXTENSION_NAME,
+#ifdef WIN32
+//Это пиздецовый говнкод, но я не осилил нахождение хедера с HWND для винды
+            "VK_KHR_win32_surface"
+#endif
+    };
 
     VkInstanceCreateInfo vkInstanceCreateInfo = {VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO};
     vkInstanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    vkInstanceCreateInfo.ppEnabledExtensionNames = extensionNames;
-    vkInstanceCreateInfo.enabledExtensionCount = C_SIZE(extensionNames);
+    vkInstanceCreateInfo.ppEnabledExtensionNames = extensions;
+    vkInstanceCreateInfo.enabledExtensionCount = C_SIZE(extensions);
 
     ASSERT_VK(vkCreateInstance(&vkInstanceCreateInfo, nullptr, &vkInstance));
 
@@ -69,9 +80,9 @@ VkPhysicalDevice pickPhysicalDevice(VkPhysicalDevice *physicalDevices) {
 VkDevice createVkDevice(VkPhysicalDevice vkPhysicalDevice, uint32_t queueFamilyIndex) {
     VkDevice vkDevice = nullptr;
 
-//    const std::vector<const char *> deviceExtenstions = {
-//            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-//    };
+    const std::vector<const char *> deviceExtenstions = {
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+    };
 
     float queuePriority = 1.0f;
 
@@ -83,8 +94,8 @@ VkDevice createVkDevice(VkPhysicalDevice vkPhysicalDevice, uint32_t queueFamilyI
     VkDeviceCreateInfo vkDeviceCreateInfo = {VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO};
     vkDeviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
     vkDeviceCreateInfo.queueCreateInfoCount = 1;
-//    vkDeviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtenstions.size());
-//    vkDeviceCreateInfo.ppEnabledExtensionNames = deviceExtenstions.data();
+    vkDeviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtenstions.size());
+    vkDeviceCreateInfo.ppEnabledExtensionNames = deviceExtenstions.data();
 
 
     ASSERT_VK(vkCreateDevice(vkPhysicalDevice, &vkDeviceCreateInfo, nullptr, &vkDevice));
@@ -94,11 +105,9 @@ VkDevice createVkDevice(VkPhysicalDevice vkPhysicalDevice, uint32_t queueFamilyI
 
 VkSurfaceKHR createVkSurface(VkInstance instance, GLFWwindow *window) {
     VkSurfaceKHR vkSurfaceKHR = nullptr;
-    VkWin32SurfaceCreateInfoKHR vkWin32SurfaceCreateInfoKHR = {VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR};
-    vkWin32SurfaceCreateInfoKHR.hinstance = glfwGetWin32Window(window);
-    vkWin32SurfaceCreateInfoKHR.hwnd = GetModuleHandle(nullptr);
+    ASSERT_VK(glfwCreateWindowSurface(instance, window, nullptr, &vkSurfaceKHR));
 
-    ASSERT_VK(vkCreateWin32SurfaceKHR(instance, &vkWin32SurfaceCreateInfoKHR, nullptr, &vkSurfaceKHR));
+    return vkSurfaceKHR;
 }
 
 uint32_t getGraphicsBitQueueFamily(VkPhysicalDevice vkPhysicalDevice) {
