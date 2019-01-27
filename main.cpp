@@ -11,9 +11,13 @@ int main() {
     glfwInit();
 
     VkInstance vkInstance = createVkInstance();
+
     VkPhysicalDevice vkPhysicalDevice = createVkPhysicalDevice(vkInstance);
-    VkDevice vkDevice = createVkDevice(vkPhysicalDevice);
-    VkSurfaceKHR vkSurfaceKHR = createVkSurface(vkInstance);
+    uint32_t queueFamilyIndex = getGraphicsBitQueueFamily(vkPhysicalDevice);
+
+    VkDevice vkDevice = createVkDevice(vkPhysicalDevice, queueFamilyIndex);
+
+//    VkSurfaceKHR vkSurfaceKHR = createVkSurface(vkInstance);
 
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     GLFWwindow *window = glfwCreateWindow(1366, 768, "vulkan_1 test", nullptr, nullptr);
@@ -23,10 +27,11 @@ int main() {
         glfwPollEvents();
     }
 
-    glfwTerminate();
-
     vkDestroyDevice(vkDevice, nullptr);
     vkDestroyInstance(vkInstance, nullptr);
+
+    glfwDestroyWindow(window);
+    glfwTerminate();
 
     return 0;
 }
